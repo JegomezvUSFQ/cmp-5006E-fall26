@@ -23,18 +23,11 @@ import math
 # ---- Task 1: entropy & unicity ----------------------------------------------
 
 def unicity_for_substitution():
-    """Return (H_K, U) for the 26! substitution cipher.
-
-    H_K is the key entropy in bits (use ``entropy_bits`` on the size of the
-    keyspace, 26!). U is the unicity distance in characters (use
-    ``unicity_distance`` with the English redundancy ``ENGLISH_REDUNDANCY``).
-
-    You should get H_K ~= 88.4 bits and U ~= 27.6 characters — which is EXACTLY
-    why week 1's attack worked: the message was hundreds of characters, far past
-    U, so the key was uniquely pinned. Below ~28 chars the break is ambiguous.
-    """
-    # TODO: N = 26!  ;  H_K = entropy_bits(N)  ;  U = unicity_distance(H_K)
-    raise NotImplementedError
+    """Return (H_K, U) for the 26! substitution cipher."""
+    N = math.factorial(26)  # number of keys
+    H_K = entropy_bits(N)  # entropy of the keyspace
+    U = unicity_distance(H_K, ENGLISH_REDUNDANCY)  # unicity distance in chars
+    return H_K, U
 
 
 # ---- Task 2: one-time pad — perfect secrecy, made concrete ------------------
@@ -47,35 +40,26 @@ def key_that_decrypts_to(ciphertext, decoy_plaintext):
     ciphertext cannot betray the real message. The key is simply
     ``ciphertext XOR decoy_plaintext``.
     """
-    # TODO: return xor(ciphertext, decoy_plaintext)
-    raise NotImplementedError
+    return xor(ciphertext, decoy_plaintext)
+    raise NotImplementedError   
 
 
 # ---- Task 3: the two-time-pad break -----------------------------------------
 
 def crib_drag(x, crib):
-    """Slide ``crib`` (bytes) across ``x = c1 XOR c2`` (which equals p1 XOR p2).
+    hits = []
 
-    At each position i, XOR the crib against x[i:i+len(crib)]. Where the crib sits
-    at its true location in one message, the OTHER message's text appears; return
-    those readable hits as a list of ``(position, revealed_fragment_bytes)``, using
-    ``printable_word`` to decide what counts as readable (lowercase + spaces).
-    Noise elsewhere; real fragments at the true spots.
-    """
-    # TODO: for i in range(len(x) - len(crib)): frag = xor(x[i:i+len(crib)], crib)
-    #       keep (i, frag) when printable_word(frag)
-    raise NotImplementedError
+    for i in range(len(x) - len(crib) + 1):
+        frag = xor(x[i:i + len(crib)], crib)
 
+        if printable_word(frag):
+            hits.append((i, frag))
+
+    return hits
 
 def recover_other_plaintext(c1, c2, p1_known):
-    """Given both ciphertexts and a full guess for p1, recover p2.
-
-    The key never mattered — it cancels. Recover the keystream from the known
-    plaintext (keystream = c1 XOR p1_known), then apply it to c2.
-    Return the recovered p2 (bytes), truncated to len(p1_known).
-    """
-    # TODO: keystream = xor(c1, p1_known)  ;  return xor(c2, keystream)
-    raise NotImplementedError
+    keystream = xor(c1, p1_known)
+    return xor(c2, keystream)
 
 
 if __name__ == "__main__":
@@ -94,5 +78,12 @@ if __name__ == "__main__":
         for crib in (b"please", b"target"):
             hits = crib_drag(x, crib)
             print(f"  crib {crib!r}: hits at {[i for i, _ in hits]}")
+            from test_otp import P1, P2 
+        
+        recovered_p2 = recover_other_plaintext(c1, c2, P1)
+        recovered_p1 = recover_other_plaintext(c2, c1, P2)
+        
+        print(f"  PlainText1: {recovered_p1.decode('utf-8')}")
+        print(f"  PlainText2: {recovered_p2.decode('utf-8')}\n")
     except NotImplementedError:
         print("  Task 3 (crib-drag) not implemented yet")

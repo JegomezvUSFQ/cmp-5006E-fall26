@@ -124,8 +124,8 @@ checkpoints. Announced in advance so it's a lesson, not a surprise.
 ## Logistics
 
 - Submit by pull request to `/homework/hw1/<lastname>/`.
-- **`AI_LOG.md`** required per [`../resources/ai-policy.md`](../resources/ai-policy.md).
+- **`AI_LOG.md`** required per [`../cmp-5006E-fall26-main/resources/ai-policy.md`](../cmp-5006E-fall26-main/resources/ai-policy.md).
 - **Ethics:** all work against the provided sandboxed targets. See
-  [`../resources/ethics-and-scope.md`](../resources/ethics-and-scope.md).
+  [`../cmp-5006E-fall26-main/resources/ethics-and-scope.md`](../cmp-5006E-fall26-main/resources/ethics-and-scope.md).
 
 

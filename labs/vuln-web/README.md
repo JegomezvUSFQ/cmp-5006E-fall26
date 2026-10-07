@@ -13,15 +13,26 @@ eye.
 
 ```bash
 docker build -t seclab/vuln-web:local labs/vuln-web    # first time only
-python -m seclab.targets --up vuln-web
-python -m seclab.targets --down                        # tear down
+py -m seclab.targets --up vuln-web
+py -m seclab.targets --down                        # tear down
 ```
 
-No Docker? It's stdlib-only, so run it directly:
+No Docker? The week-6 studio starts the app in-process on `127.0.0.1`:
 
 ```bash
-PORT=8000 python labs/vuln-web/app/vulnweb_app.py
+cd studios/week-06
+py test_studio.py
 ```
+
+For a standalone local server on Windows PowerShell, run from the repository root:
+
+```powershell
+py labs/vuln-web/app/vulnweb_app.py
+```
+
+The standalone server defaults to `127.0.0.1:8000`. The Docker image sets
+`HOST=0.0.0.0` inside the container; `seclab.targets` publishes its port only on
+the host's `127.0.0.1`.
 
 The [`../../notebooks/week-06-injection.ipynb`](../../notebooks/week-06-injection.ipynb)
 notebook uses the Docker target if present and otherwise runs the app in-process,

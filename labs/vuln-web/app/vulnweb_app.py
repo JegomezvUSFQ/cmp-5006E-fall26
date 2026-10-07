@@ -138,9 +138,10 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
+    host = os.environ.get("HOST", "127.0.0.1")
     port = int(os.environ.get("PORT", "8000"))
-    srv = ThreadingHTTPServer(("0.0.0.0", port), Handler)
-    print(f"vuln-web on :{port}", file=sys.stderr, flush=True)
+    srv = ThreadingHTTPServer((host, port), Handler)
+    print(f"vuln-web on {host}:{port}", file=sys.stderr, flush=True)
     try:
         srv.serve_forever()
     except KeyboardInterrupt:

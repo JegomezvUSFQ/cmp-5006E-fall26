@@ -24,19 +24,26 @@ def batch_gcd_recover(corpus):
     """Find every public key whose modulus shares a prime with another key, and
     recover its private exponent d.
 
-    ``corpus`` is the dict from ``rsa_lab.load_keys()``; the public keys are in
-    ``corpus["keys"]`` as [{"n":..., "e":...}, ...].
+    `corpus` is the dict from `rsa_lab.load_keys()`; the public keys are in
+    `corpus["keys"]` as [{"n":..., "e":...}, ...].
 
-    Return a dict ``{index: d}`` with one entry per vulnerable key. A key that
+    Return a dict `{index: d}` with one entry per vulnerable key. A key that
     shares no factor with any other key must NOT appear.
-
-    Hint: for each pair (i, j), ``math.gcd(n_i, n_j)`` is either 1 (safe) or the
-    shared prime (both fall). Given the shared prime, ``factor_from_shared`` in
-    rsa_lab turns it into d.
     """
-    # TODO: pairwise-GCD scan over corpus["keys"]; for any pair with gcd != 1,
-    # recover d for BOTH keys via factor_from_shared(n, gcd, e).
-    raise NotImplementedError
+    recovered = {}
+    keys = corpus["keys"]
+    n_keys = len(keys)
+
+    for i in range(n_keys):
+        for j in range(i + 1, n_keys):
+            g = math.gcd(keys[i]["n"], keys[j]["n"])
+            
+            # Si g > 1 y es menor que n_i, encontramos un factor primo compartido no trivial
+            if 1 < g < keys[i]["n"]:
+                recovered[i] = factor_from_shared(keys[i]["n"], g, keys[i]["e"])
+                recovered[j] = factor_from_shared(keys[j]["n"], g, keys[j]["e"])
+
+    return recovered
 
 
 # ---- Task 3: timing side-channel attack -------------------------------------
@@ -54,11 +61,41 @@ def timing_attack(secret_len, oracle, rounds=41):
     ``time_guesses(oracle, guesses, rounds)`` (it interleaves them so drift can't
     bias one candidate), then keep the slowest byte.
     """
-    # TODO: for pos in range(secret_len):
-    #   guesses = [known_prefix + bytes([b]) + padding for b in range(256)]
-    #   med = time_guesses(oracle, guesses, rounds)
-    #   append the byte with the largest median time to the recovered prefix.
-    raise NotImplementedError
+
+    recovered = bytearray()
+
+    for pos in range(secret_len):
+
+        # Create the 256 possible guesses for the current byte
+        guesses = []
+
+        for b in range(256):
+            padding = bytes(secret_len - pos - 1)
+
+            guess = (
+                bytes(recovered)
+                + bytes([b])
+                + padding
+            )
+
+            guesses.append(guess)
+
+        # Measure all candidates
+        medians = time_guesses(
+            oracle,
+            guesses,
+            rounds
+        )
+
+        # The slowest candidate is expected to contain the correct byte
+        best_byte = max(
+            range(256),
+            key=lambda b: medians[b]
+        )
+
+        recovered.append(best_byte)
+
+    return bytes(recovered)
 
 
 # ---- Task 3 (fix): constant-time comparison ---------------------------------
@@ -66,9 +103,16 @@ def timing_attack(secret_len, oracle, rounds=41):
 def constant_time_equal(a, b):
     """The fix. Examine EVERY byte regardless of mismatches, so the duration does
     not depend on the secret. (In real code, call ``hmac.compare_digest``.)"""
-    # TODO: length check, then accumulate x ^ y across all bytes; return whether
-    # the accumulator is 0 — never early-exit.
-    raise NotImplementedError
+
+    if len(a) != len(b):
+        return False
+
+    result = 0
+
+    for x, y in zip(a, b):
+        result |= x ^ y
+
+    return result == 0
 
 
 if __name__ == "__main__":

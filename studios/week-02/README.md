@@ -13,7 +13,7 @@ break was inevitable* (entropy + unicity distance), shows the one cipher it coul
 never touch (the one-time pad, with **provable** perfect secrecy) — and then
 destroys even that guarantee with a single misuse: reuse the key once. That break
 is the payload. Everything here is pure Python; no `seclab` import, no network.
-
+ 
 ## Files in this folder
 
 | File | Purpose | You edit it? |

@@ -35,6 +35,9 @@ the code you write does not change.
 | [`webharness.py`](webharness.py) | Given: brings `vuln-web` up in-process (`get`/`post`/senders), the **classical scanner arm** (line-oriented regex rules), the canned LLM review, and `load_ground_truth()` | no |
 | [`starter.py`](starter.py) | **Tasks 1–2** — confirm SQLi / XSS / cmdi with oracles, and parse the LLM arm into `ScanResult`s | yes |
 | [`test_studio.py`](test_studio.py) | Provided tests, incl. the guarantee test `test_scanner_misses_sqli_and_neither_finds_bac` | no |
+| [`ground_truth.json`](ground_truth.json) | Local copy of the hand-verified fixture, used when the Duel-2 project directory is absent | no |
+| [`scorecard.md`](scorecard.md) | Completed Task 3 and the duel analysis | yes |
+| [`scorecard_check.py`](scorecard_check.py) | Reproducible 20-input XSS control measurement and bypass attempt | yes |
 
 The vulnerable code you attack **and** scan is the single readable file
 [`../../labs/vuln-web/app/vulnweb_app.py`](../../labs/vuln-web/app/vulnweb_app.py) —
@@ -82,6 +85,10 @@ We **reuse** the already-built Duel-2 ground truth —
 source**, not by running a tool (a ground truth that is "whatever sqlmap found"
 rigs the duel). We do **not** create a competing one.
 
+This checkout does not include `projects/duel-2-web`. The harness uses the
+supplied [`ground_truth.json`](ground_truth.json) in this folder when that
+project fixture is absent.
+
 Then answer the questions that matter more than F1:
 
 1. What did the LLM **hallucinate**? (It claims a `broken-access-control` bug in an
@@ -113,6 +120,8 @@ confirms that **neither** arm cleanly finds Broken Access Control. That is OWASP
 automation is worst at, because it is about **intent, not syntax**. Two other
 tests pin oracle discipline — a benign login and an html-escaped reflection must
 **not** confirm; a reflected string alone is never a finding.
+
+Run `py scorecard_check.py` for the Task 3 coverage and bypass measurement.
 
 Fast-finishing pairs: **run the LLM arm twice against a real model. Do the
 findings change? A scan you cannot reproduce is not evidence (axis 9).**
